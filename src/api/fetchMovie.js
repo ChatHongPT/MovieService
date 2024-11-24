@@ -1,18 +1,20 @@
+// [fetchMovie.js]
 import axios from './axios';
 
 const fetchMovie = async (movieId, categoryId) => {
-  const movieDetails = await axios.get(categoryId === 'TV' ? 'tv/' + movieId : 'movie/' + movieId, {
+  const endpoint = categoryId === 'TV' ? `tv/${movieId}` : `movie/${movieId}`;
+  const response = await axios.get(endpoint, {
     params: { append_to_response: 'videos' },
   });
-  if (movieDetails.data.videos.results.length > 0) {
-    movieDetails.data.officialVideos = [];
-    for (let obj of movieDetails.data.videos.results) {
-      if (obj.type === 'Teaser' || obj.type === 'Trailer') {
-        movieDetails.data.officialVideos.push(obj);
-      }
-    }
+
+  // 영상 필터링 로직
+  if (response.data.videos?.results?.length > 0) {
+    response.data.officialVideos = response.data.videos.results.filter(
+      (video) => video.type === 'Teaser' || video.type === 'Trailer'
+    );
   }
-  return movieDetails;
+
+  return response.data;
 };
 
 export default fetchMovie;
